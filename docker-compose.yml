@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+  webapp-api:
+    build:
+      context: ./
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+    environment:
+      NODE_ENV: development
+    networks:
+      - webapp-network
+    depends_on:
+      - webapp-database
+
+  webapp-database:
+    image: postgres:14.4-alpine
+    container_name: webapp-database
+    restart: unless-stopped
+    ports:
+      - "5434:5432"
+    networks:
+      - webapp-network
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-webapp}
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    hostname: webapp-database-host
+
+networks:
+  webapp-network:
+    driver: bridge
